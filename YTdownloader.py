@@ -1,11 +1,10 @@
 import http.client
 import time
-import os
+import pathlib
 import re
 
 import pytube
 from pytube.cli import on_progress
-
 
 COMMANDS = ["cancion", "video", "lista", "canal", "salir", "exit", "ayuda"]
 ERROR = "Se ha producido algún error al leer la fuente de la descarga, saltando descarga"
@@ -16,7 +15,7 @@ BANNER = """\n\n
     \__   __/ _ \| | | |  _) | | | || \ / _  )   / || |/ _ \| | | |  _ \| |/ _ \ / _  |/ || |/ _  )/ ___)
       _| |_| |_| | |_| | |_| |_| | |_) | (/ /   ( (_| | |_| | | | | | | | | |_| ( ( | ( (_| ( (/ /| |    
      (_____)\___/ \____|\___)____|____/ \____)   \____|\___/ \____|_| |_|_|\___/ \_||_|\____|\____)_|    
-                                                                                                        
+
                              _              ______                                                                  
                             | |            (_____ \                                                                 
                             | | _  _   _    _____) )_   _ _   _                                                     
@@ -30,7 +29,7 @@ BANNER = """\n\n
 def download_video(video: pytube.YouTube):
     try:
         print("Descargando:\n")
-        video.streams.get_highest_resolution().download(os.getcwd())
+        video.streams.get_highest_resolution().download(str(pathlib.Path.cwd()))
         print("\n")
     except http.client.IncompleteRead:
         print(ERROR)
@@ -89,15 +88,15 @@ def handle_channel():
     link = input("escribe el link completo del canal que quieras descargar\n")
     canal = pytube.Channel(link)
     print("Título: ", canal.channel_name)
-    respuesta = input("\n¿Este ese el canal cuyos videos que quieres descargar? Y/N\n").lower()
+    confirmation = input("\n¿Este ese el canal cuyos videos que quieres descargar? Y/N\n").lower()
 
-    if is_yes(respuesta):
+    if is_yes(confirmation):
         for url in canal.video_urls:
             print(url)
             video = pytube.YouTube(url, on_progress_callback=on_progress)
             print("\nEncontrado: ", video.title)
-            respuesta = input("\n¿Descargar este video del canal? Y/N\n").lower()
-            if is_yes(respuesta):
+            confirmation = input("\n¿Descargar este video del canal? Y/N\n").lower()
+            if is_yes(confirmation):
                 download_video(video)
 
 
@@ -112,10 +111,9 @@ def handle_song():
         try:
             print("Descargando:\n")
             cancion = video.streams.get_audio_only()
-            audio = cancion.download(os.getcwd())
-            base, ext = os.path.splitext(audio)
-            amp3 = base + ".mp3"
-            os.rename(audio, amp3)
+            audio = cancion.download(str(pathlib.Path.cwd()))
+            audio = pathlib.Path.cwd().joinpath(audio)
+            pathlib.Path(str(audio)).rename(audio.with_suffix('.mp3'))
             print("\n")
         except http.client.IncompleteRead:
             print(ERROR)

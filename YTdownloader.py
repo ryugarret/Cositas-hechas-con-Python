@@ -23,7 +23,7 @@ BANNER = """\n\n
                             | |_) ) |_| |  | |   | | |_| | |_| |                                                    
                             |____/ \__  |  |_|   |_|\__  |\____|                                                    
                                   (____/           (____/                                                           
-    \n\n"""
+    \n\n""" # noqa
 
 
 def download_video(video: pytube.YouTube):
